@@ -11,20 +11,31 @@ export default function Navbar() {
   };
 
   return (
-    <nav className="border-b border-gray-200 bg-white shadow-sm">
-      <div className="mx-auto flex max-w-5xl items-center justify-between px-4 py-3">
-        <Link to="/" className="text-xl font-bold text-indigo-600">
-          🔥 Habit Tracker
+    <nav className="sticky top-0 z-40 border-b border-slate-200/80 bg-white/95 backdrop-blur-md shadow-xs">
+      <div className="mx-auto flex max-w-5xl items-center justify-between px-4 sm:px-6 py-3.5">
+        <Link
+          to="/"
+          className="flex items-center gap-2 text-xl font-bold tracking-tight text-brand-600 transition-opacity hover:opacity-90"
+        >
+          <span className="text-2xl">🔥</span>
+          <span className="bg-gradient-to-r from-brand-600 to-indigo-800 bg-clip-text text-transparent">
+            Habit Tracker
+          </span>
         </Link>
 
         {user && (
-          <div className="flex items-center gap-4">
-            <span className="text-sm text-gray-500">
-              {user.email} ({user.timezone})
-            </span>
+          <div className="flex items-center gap-3 sm:gap-4">
+            <div className="hidden sm:flex flex-col items-end text-right">
+              <span className="text-xs font-semibold text-slate-800">
+                {user.email}
+              </span>
+              <span className="text-[11px] font-medium text-slate-500">
+                {user.timezone}
+              </span>
+            </div>
             <button
               onClick={handleLogout}
-              className="rounded-md bg-gray-100 px-3 py-1.5 text-sm font-medium text-gray-700 hover:bg-gray-200 transition-colors"
+              className="rounded-lg bg-slate-100 px-3.5 py-1.5 text-xs font-semibold text-slate-700 hover:bg-slate-200/80 hover:text-slate-900 transition-all active:scale-95"
             >
               Log out
             </button>

@@ -9,23 +9,33 @@ interface Props {
 
 export default function HabitCard({ habit }: Props) {
   return (
-    <div className="rounded-lg border border-gray-200 bg-white p-5 shadow-sm hover:shadow-md transition-shadow">
-      <div className="flex items-start justify-between">
-        <div className="flex-1">
+    <div
+      className={`group relative rounded-2xl border bg-white p-6 shadow-xs transition-all duration-200 ease-out hover:-translate-y-1 hover:shadow-lg ${
+        habit.checkedInToday
+          ? 'border-l-4 border-l-emerald-500 border-slate-200/80 bg-slate-50/30'
+          : 'border-slate-200/80 hover:border-slate-300'
+      }`}
+    >
+      <div className="flex flex-col sm:flex-row sm:items-start justify-between gap-4">
+        <div className="flex-1 min-w-0">
           <Link
             to={`/habits/${habit.id}`}
-            className="text-lg font-semibold text-gray-900 hover:text-indigo-600 transition-colors"
+            className="text-lg font-bold tracking-tight text-slate-900 group-hover:text-brand-600 transition-colors line-clamp-1"
           >
             {habit.name}
           </Link>
           {habit.description && (
-            <p className="mt-1 text-sm text-gray-500">{habit.description}</p>
+            <p className="mt-1.5 text-sm leading-relaxed text-slate-500 line-clamp-2">
+              {habit.description}
+            </p>
           )}
         </div>
-        <CheckInButton habitId={habit.id} checkedInToday={habit.checkedInToday} />
+        <div className="shrink-0">
+          <CheckInButton habitId={habit.id} checkedInToday={habit.checkedInToday} />
+        </div>
       </div>
 
-      <div className="mt-4">
+      <div className="mt-5 pt-4 border-t border-slate-100">
         <StreakDisplay streaks={habit.streaks} />
       </div>
     </div>
