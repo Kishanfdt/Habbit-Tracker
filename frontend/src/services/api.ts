@@ -1,20 +1,17 @@
-import axios, { AxiosError } from 'axios';
-import type {
-  AuthResponse,
-  HabitWithStreaks,
-  HabitDetail,
-  CheckIn,
-  Habit,
-} from '../types';
+import axios from 'axios';
+import { AuthResponse, Habit, HabitWithStreaks, HabitDetail, CheckIn, User, ID } from '../types';
 
-const API_URL = import.meta.env.VITE_API_URL || '';
+const API_BASE_URL =
+  import.meta.env.VITE_API_URL || 'http://localhost:3000/api';
 
 const api = axios.create({
-  baseURL: `${API_URL}/api`,
-  headers: { 'Content-Type': 'application/json' },
+  baseURL: API_BASE_URL,
+  headers: {
+    'Content-Type': 'application/json',
+  },
 });
 
-// Attach JWT to every request
+// Attach JWT token to every request if available
 api.interceptors.request.use((config) => {
   const token = localStorage.getItem('token');
   if (token) {
@@ -23,19 +20,21 @@ api.interceptors.request.use((config) => {
   return config;
 });
 
-// Redirect to login on 401
-api.interceptors.response.use(
-  (res) => res,
-  (err: AxiosError) => {
-    if (err.response?.status === 401) {
-      localStorage.removeItem('token');
-      if (window.location.pathname !== '/login') {
-        window.location.href = '/login';
-      }
-    }
-    return Promise.reject(err);
-  },
-);
+// Helper to extract clean error message from API response
+export function getErrorMessage(error: unknown): string {
+  if (axios.isAxiosError(error)) {
+    return (
+      error.response?.data?.error ||
+      error.response?.data?.message ||
+      error.message ||
+      'An unexpected error occurred'
+    );
+  }
+  if (error instanceof Error) {
+    return error.message;
+  }
+  return 'An unexpected error occurred';
+}
 
 // ── Auth ───────────────────────────────────────────────
 export async function signup(
@@ -62,8 +61,8 @@ export async function login(
   return data;
 }
 
-export async function getMe() {
-  const { data } = await api.get<{ user: import('../types').User }>('/auth/me');
+export async function getMe(): Promise<User> {
+  const { data } = await api.get<{ user: User }>('/auth/me');
   return data.user;
 }
 
@@ -73,7 +72,7 @@ export async function getHabits(): Promise<HabitWithStreaks[]> {
   return data.habits;
 }
 
-export async function getHabit(id: number): Promise<HabitDetail> {
+export async function getHabit(id: ID): Promise<HabitDetail> {
   const { data } = await api.get<HabitDetail>(`/habits/${id}`);
   return data;
 }
@@ -90,20 +89,20 @@ export async function createHabit(
 }
 
 export async function updateHabit(
-  id: number,
+  id: ID,
   updates: { name?: string; description?: string },
 ): Promise<Habit> {
   const { data } = await api.put<Habit>(`/habits/${id}`, updates);
   return data;
 }
 
-export async function deleteHabit(id: number): Promise<void> {
+export async function deleteHabit(id: ID): Promise<void> {
   await api.delete(`/habits/${id}`);
 }
 
 // ── Check-ins ──────────────────────────────────────────
 export async function createCheckIn(
-  habitId: number,
+  habitId: ID,
   date?: string,
 ): Promise<CheckIn> {
   const body = date ? { date } : {};
@@ -114,18 +113,9 @@ export async function createCheckIn(
   return data;
 }
 
-export async function getCheckIns(habitId: number): Promise<CheckIn[]> {
+export async function getCheckIns(habitId: ID): Promise<CheckIn[]> {
   const { data } = await api.get<{ checkIns: CheckIn[] }>(
     `/habits/${habitId}/check-ins`,
   );
   return data.checkIns;
-}
-
-export function getErrorMessage(err: unknown): string {
-  if (axios.isAxiosError(err)) {
-    const data = err.response?.data as { message?: string; error?: string } | undefined;
-    return data?.message || data?.error || err.message;
-  }
-  if (err instanceof Error) return err.message;
-  return 'An unexpected error occurred';
 }

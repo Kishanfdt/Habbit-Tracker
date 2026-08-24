@@ -1,5 +1,7 @@
+export type ID = string;
+
 export interface User {
-  id: number;
+  id: ID;
   email: string;
   password_hash: string;
   timezone: string;
@@ -7,17 +9,17 @@ export interface User {
 }
 
 export interface Habit {
-  id: number;
-  user_id: number;
+  id: ID;
+  user_id: ID;
   name: string;
   description: string | null;
   created_at: Date;
 }
 
 export interface CheckIn {
-  id: number;
-  habit_id: number;
-  user_id: number;
+  id: ID;
+  habit_id: ID;
+  user_id: ID;
   checked_in_at: Date;
   local_date: string; // YYYY-MM-DD
   created_at: Date;
@@ -39,7 +41,7 @@ export interface HabitDetail extends Habit {
 }
 
 export interface AuthPayload {
-  id: number;
+  id: ID;
   email: string;
   timezone: string;
 }

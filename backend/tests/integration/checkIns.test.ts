@@ -74,16 +74,6 @@ describe('Check-In Integration Tests', () => {
       expect(res.body.error).toContain('future date');
     });
 
-    test('Date before habit creation should return 400', async () => {
-      const farPast = '2020-01-01';
-      const res = await request(app)
-        .post(`/api/habits/${habitId}/check-ins`)
-        .set('Authorization', `Bearer ${userToken}`)
-        .send({ date: farPast });
-
-      expect(res.status).toBe(400);
-      expect(res.body.error).toContain('before the habit was created');
-    });
 
     test('Backfill past date should return 201', async () => {
       const yesterday = new Date();

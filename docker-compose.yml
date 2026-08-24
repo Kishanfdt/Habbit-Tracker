@@ -1,26 +1,17 @@
 version: '3.8'
 
 services:
-  postgres:
-    image: postgres:15-alpine
-    environment:
-      POSTGRES_USER: habittracker
-      POSTGRES_PASSWORD: password
-      POSTGRES_DB: habittracker
+  mongodb:
+    image: mongo:6-alpine
     volumes:
-      - postgres_data:/var/lib/postgresql/data
+      - mongo_data:/data/db
     ports:
-      - "5432:5432"
-    healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U habittracker"]
-      interval: 5s
-      timeout: 5s
-      retries: 5
+      - "27017:27017"
 
   backend:
     build: ./backend
     environment:
-      DATABASE_URL: postgresql://habittracker:password@postgres:5432/habittracker
+      MONGODB_URI: ${MONGODB_URI:-mongodb://mongodb:27017/habittracker}
       JWT_SECRET: change-this-to-a-strong-secret-min-32-chars
       JWT_EXPIRES_IN: 7d
       PORT: "3000"
@@ -29,8 +20,7 @@ services:
     ports:
       - "3000:3000"
     depends_on:
-      postgres:
-        condition: service_healthy
+      - mongodb
 
   frontend:
     build: ./frontend
@@ -40,4 +30,4 @@ services:
       - backend
 
 volumes:
-  postgres_data:
+  mongo_data:

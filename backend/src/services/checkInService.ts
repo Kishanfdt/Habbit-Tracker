@@ -12,45 +12,35 @@ import {
   ValidationError,
   ConflictError,
 } from '../middleware/errors';
-import { CheckIn } from '../types';
+import { CheckIn, ID } from '../types';
 
 export async function createCheckIn(
-  userId: number,
-  habitId: number,
+  userId: ID,
+  habitId: ID,
   dateStr: string | undefined,
   userTimezone: string
 ): Promise<CheckIn> {
-  // 1. Get habit, verify it exists and user owns it
   const habit = await HabitModel.findById(habitId);
   if (!habit) {
     throw new NotFoundError('Habit not found');
   }
-  if (habit.user_id !== userId) {
+  if (String(habit.user_id) !== String(userId)) {
     throw new ForbiddenError('You do not own this habit');
   }
 
-  // 2. Determine the local date for this check-in
   const localDate = dateStr || getUserLocalToday(userTimezone);
 
-  // 3. Validate: not a future date
   if (isFutureDate(localDate, userTimezone)) {
     throw new ValidationError('Cannot check in for a future date');
   }
 
-  // 4. Validate: not before habit creation
-  const habitCreatedLocalDate = utcToLocalDateStr(habit.created_at, userTimezone);
-  if (isBeforeDate(localDate, habitCreatedLocalDate)) {
-    throw new ValidationError('Cannot check in for a date before the habit was created');
-  }
-
-  // 5. Insert — the DB UNIQUE constraint handles duplicate detection
   const now = new Date();
   try {
     const checkIn = await CheckInModel.create(habitId, userId, now, localDate);
     return checkIn;
   } catch (err: unknown) {
-    // Postgres unique violation code
-    if ((err as Record<string, unknown>).code === '23505') {
+    const code = (err as unknown as Record<string, unknown>).code;
+    if (code === '23505' || code === 11000 || code === '11000') {
       throw new ConflictError('Already checked in for this date');
     }
     throw err;
@@ -58,14 +48,14 @@ export async function createCheckIn(
 }
 
 export async function getCheckInsForHabit(
-  habitId: number,
-  userId: number
+  habitId: ID,
+  userId: ID
 ): Promise<CheckIn[]> {
   const habit = await HabitModel.findById(habitId);
   if (!habit) {
     throw new NotFoundError('Habit not found');
   }
-  if (habit.user_id !== userId) {
+  if (String(habit.user_id) !== String(userId)) {
     throw new ForbiddenError('You do not own this habit');
   }
 

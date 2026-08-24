@@ -1,5 +1,6 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import * as api from '../services/api';
+import { ID } from '../types';
 
 export function useHabits() {
   return useQuery({
@@ -8,7 +9,7 @@ export function useHabits() {
   });
 }
 
-export function useHabit(id: number) {
+export function useHabit(id: ID) {
   return useQuery({
     queryKey: ['habits', id],
     queryFn: () => api.getHabit(id),
@@ -31,7 +32,7 @@ export function useUpdateHabit() {
       id,
       updates,
     }: {
-      id: number;
+      id: ID;
       updates: { name?: string; description?: string };
     }) => api.updateHabit(id, updates),
     onSuccess: () => qc.invalidateQueries({ queryKey: ['habits'] }),
@@ -41,7 +42,7 @@ export function useUpdateHabit() {
 export function useDeleteHabit() {
   const qc = useQueryClient();
   return useMutation({
-    mutationFn: (id: number) => api.deleteHabit(id),
+    mutationFn: (id: ID) => api.deleteHabit(id),
     onSuccess: () => qc.invalidateQueries({ queryKey: ['habits'] }),
   });
 }
@@ -49,7 +50,7 @@ export function useDeleteHabit() {
 export function useCreateCheckIn() {
   const qc = useQueryClient();
   return useMutation({
-    mutationFn: ({ habitId, date }: { habitId: number; date?: string }) =>
+    mutationFn: ({ habitId, date }: { habitId: ID; date?: string }) =>
       api.createCheckIn(habitId, date),
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: ['habits'] });

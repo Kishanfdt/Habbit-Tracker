@@ -1,22 +1,24 @@
+export type ID = string | number;
+
 export interface User {
-  id: number;
+  id: ID;
   email: string;
   timezone: string;
   created_at: string;
 }
 
 export interface Habit {
-  id: number;
-  user_id: number;
+  id: ID;
+  user_id: ID;
   name: string;
   description: string | null;
   created_at: string;
 }
 
 export interface CheckIn {
-  id: number;
-  habit_id: number;
-  user_id: number;
+  id: ID;
+  habit_id: ID;
+  user_id: ID;
   checked_in_at: string;
   local_date: string;
   created_at: string;

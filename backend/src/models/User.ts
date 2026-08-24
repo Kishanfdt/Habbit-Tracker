@@ -1,14 +1,43 @@
-import { query } from '../config/database';
-import { User } from '../types';
+import mongoose, { Schema, Document } from 'mongoose';
+import { User, ID } from '../types';
 
-export async function findByEmail(email: string): Promise<User | null> {
-  const result = await query('SELECT * FROM users WHERE email = $1', [email]);
-  return result.rows[0] || null;
+export interface IUserDocument extends Document {
+  email: string;
+  password_hash: string;
+  timezone: string;
+  created_at: Date;
 }
 
-export async function findById(id: number): Promise<User | null> {
-  const result = await query('SELECT * FROM users WHERE id = $1', [id]);
-  return result.rows[0] || null;
+const userSchema = new Schema<IUserDocument>({
+  email: { type: String, required: true, unique: true, index: true },
+  password_hash: { type: String, required: true },
+  timezone: { type: String, required: true },
+  created_at: { type: Date, default: Date.now },
+});
+
+export const UserModel =
+  mongoose.models.User || mongoose.model<IUserDocument>('User', userSchema);
+
+export function mapUser(doc: IUserDocument | null): User | null {
+  if (!doc) return null;
+  return {
+    id: doc._id.toString(),
+    email: doc.email,
+    password_hash: doc.password_hash,
+    timezone: doc.timezone,
+    created_at: doc.created_at,
+  };
+}
+
+export async function findByEmail(email: string): Promise<User | null> {
+  const doc = await UserModel.findOne({ email }).exec();
+  return mapUser(doc);
+}
+
+export async function findById(id: ID): Promise<User | null> {
+  if (!mongoose.Types.ObjectId.isValid(id)) return null;
+  const doc = await UserModel.findById(id).exec();
+  return mapUser(doc);
 }
 
 export async function create(
@@ -16,9 +45,11 @@ export async function create(
   passwordHash: string,
   timezone: string
 ): Promise<User> {
-  const result = await query(
-    'INSERT INTO users (email, password_hash, timezone) VALUES ($1, $2, $3) RETURNING *',
-    [email, passwordHash, timezone]
-  );
-  return result.rows[0];
+  const doc = await UserModel.create({
+    email,
+    password_hash: passwordHash,
+    timezone,
+    created_at: new Date(),
+  });
+  return mapUser(doc)!;
 }

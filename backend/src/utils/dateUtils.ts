@@ -7,8 +7,9 @@ import { format, parseISO, subDays } from 'date-fns';
  * Example: utcToLocalDateStr(new Date('2026-03-11T21:30Z'), 'Asia/Kolkata')
  *          → '2026-03-12' (because UTC+05:30 makes it 03:00 on the 12th)
  */
-export function utcToLocalDateStr(utcDate: Date, timezone: string): string {
-  const zonedTime = toZonedTime(utcDate, timezone);
+export function utcToLocalDateStr(utcDate: Date | string, timezone: string): string {
+  const d = typeof utcDate === 'string' ? parseISO(utcDate) : utcDate;
+  const zonedTime = toZonedTime(d, timezone);
   return format(zonedTime, 'yyyy-MM-dd');
 }
 

@@ -9,7 +9,7 @@ export async function create(req: Request, res: Response, next: NextFunction) {
 
     const checkIn = await checkInService.createCheckIn(
       req.user.id,
-      parseInt(habitId),
+      habitId,
       date,
       req.user.timezone
     );
@@ -25,7 +25,7 @@ export async function getByHabit(req: Request, res: Response, next: NextFunction
     const { id: habitId } = req.params;
 
     const checkIns = await checkInService.getCheckInsForHabit(
-      parseInt(habitId),
+      habitId,
       req.user.id
     );
     res.json({ checkIns });

@@ -14,7 +14,7 @@ describe('Auth Integration Tests', () => {
       expect(res.status).toBe(201);
       expect(res.body).toHaveProperty('token');
       expect(res.body.user).toEqual({
-        id: expect.any(Number),
+        id: expect.anything(),
         email: 'test@example.com',
         timezone: 'Asia/Kolkata',
       });
@@ -133,7 +133,7 @@ describe('Auth Integration Tests', () => {
 
       expect(res.status).toBe(200);
       expect(res.body.user).toEqual({
-        id: expect.any(Number),
+        id: expect.anything(),
         email: 'test@example.com',
         timezone: 'Asia/Kolkata',
       });

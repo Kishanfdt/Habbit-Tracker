@@ -11,19 +11,10 @@ jobs:
     runs-on: ubuntu-latest
 
     services:
-      postgres:
-        image: postgres:15-alpine
-        env:
-          POSTGRES_USER: test
-          POSTGRES_PASSWORD: test
-          POSTGRES_DB: habittracker_test
-        options: >-
-          --health-cmd pg_isready
-          --health-interval 10s
-          --health-timeout 5s
-          --health-retries 5
+      mongodb:
+        image: mongo:6-alpine
         ports:
-          - 5432:5432
+          - 27017:27017
 
     defaults:
       run:
@@ -49,7 +40,7 @@ jobs:
       - name: Run tests
         run: npm test
         env:
-          DATABASE_URL: postgresql://test:test@127.0.0.1:5432/habittracker_test
+          MONGODB_URI: mongodb://127.0.0.1:27017/habittracker_test
           JWT_SECRET: ci-test-secret-key-at-least-32-chars-long
           NODE_ENV: test
 

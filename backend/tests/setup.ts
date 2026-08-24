@@ -1,20 +1,42 @@
-import { query, runMigrations, closePool } from '../src/config/database';
+import { MongoMemoryServer } from 'mongodb-memory-server';
+import mongoose from 'mongoose';
+import { connectDB, closePool } from '../src/config/database';
 import dotenv from 'dotenv';
 
 dotenv.config();
 
+jest.setTimeout(60000);
+
+let mongoServer: MongoMemoryServer | null = null;
+
 export async function setupTestDB(): Promise<void> {
-  await runMigrations();
+  if (mongoose.connection.readyState === 1) {
+    return;
+  }
+  const uri = process.env.MONGODB_URI || process.env.DATABASE_URL;
+  if (uri) {
+    await connectDB(uri);
+  } else {
+    if (!mongoServer) {
+      mongoServer = await MongoMemoryServer.create();
+    }
+    await connectDB(mongoServer.getUri());
+  }
 }
 
 export async function truncateAllTables(): Promise<void> {
-  await query('TRUNCATE TABLE check_ins CASCADE');
-  await query('TRUNCATE TABLE habits CASCADE');
-  await query('TRUNCATE TABLE users CASCADE');
+  if (mongoose.connection.readyState === 1) {
+    const collections = mongoose.connection.collections;
+    for (const key in collections) {
+      await collections[key].deleteMany({});
+    }
+  }
 }
 
 export async function closeTestDB(): Promise<void> {
-  await closePool();
+  if (mongoose.connection.readyState !== 0) {
+    await truncateAllTables();
+  }
 }
 
 // Jest hooks
@@ -27,5 +49,9 @@ afterEach(async () => {
 });
 
 afterAll(async () => {
-  await closeTestDB();
+  if (mongoServer) {
+    await closePool();
+    await mongoServer.stop();
+    mongoServer = null;
+  }
 });

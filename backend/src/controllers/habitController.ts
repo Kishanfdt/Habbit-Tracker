@@ -27,7 +27,7 @@ export async function getById(req: Request, res: Response, next: NextFunction) {
     if (!req.user) return res.status(401).json({ error: 'Unauthorized' });
     const { id } = req.params;
     const habit = await habitService.getHabitDetail(
-      parseInt(id),
+      id,
       req.user.id,
       req.user.timezone
     );
@@ -43,7 +43,7 @@ export async function update(req: Request, res: Response, next: NextFunction) {
     const { id } = req.params;
     const { name, description } = req.body;
     const habit = await habitService.updateHabit(
-      parseInt(id),
+      id,
       req.user.id,
       name,
       description
@@ -58,7 +58,7 @@ export async function remove(req: Request, res: Response, next: NextFunction) {
   try {
     if (!req.user) return res.status(401).json({ error: 'Unauthorized' });
     const { id } = req.params;
-    await habitService.deleteHabit(parseInt(id), req.user.id);
+    await habitService.deleteHabit(id, req.user.id);
     res.status(204).send();
   } catch (error) {
     next(error);

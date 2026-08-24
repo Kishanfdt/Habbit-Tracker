@@ -2,7 +2,7 @@ import bcrypt from 'bcryptjs';
 import jwt from 'jsonwebtoken';
 import * as UserModel from '../models/User';
 import { AuthError, ConflictError, ValidationError } from '../middleware/errors';
-import { AuthPayload } from '../types';
+import { AuthPayload, ID } from '../types';
 
 const JWT_SECRET = process.env.JWT_SECRET || 'default-secret-change-me';
 const JWT_EXPIRES_IN = process.env.JWT_EXPIRES_IN || '7d';
@@ -30,7 +30,7 @@ export async function signup(
   email: string,
   password: string,
   timezone: string
-): Promise<{ token: string; user: { id: number; email: string; timezone: string } }> {
+): Promise<{ token: string; user: { id: ID; email: string; timezone: string } }> {
   if (!isValidTimezone(timezone)) {
     throw new ValidationError(`Invalid timezone: ${timezone}`);
   }
@@ -59,7 +59,7 @@ export async function signup(
 export async function login(
   email: string,
   password: string
-): Promise<{ token: string; user: { id: number; email: string; timezone: string } }> {
+): Promise<{ token: string; user: { id: ID; email: string; timezone: string } }> {
   const user = await UserModel.findByEmail(email);
   if (!user) {
     throw new AuthError('Invalid email or password');

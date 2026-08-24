@@ -47,8 +47,8 @@ describe('Habits Integration Tests', () => {
 
       expect(res.status).toBe(201);
       expect(res.body).toEqual({
-        id: expect.any(Number),
-        user_id: expect.any(Number),
+        id: expect.anything(),
+        user_id: expect.anything(),
         name: 'Read a Book',
         description: '10 pages of a book',
         created_at: expect.any(String),

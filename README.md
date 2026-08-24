@@ -3,7 +3,7 @@
 [![CI](https://github.com/Kishanfdt/Habbit-Tracker/actions/workflows/ci.yml/badge.svg)](https://github.com/Kishanfdt/Habbit-Tracker/actions/workflows/ci.yml)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 
-A full-stack habit tracking application engineered to measure streaks in **user-local calendar days** rather than raw elapsed hours. Build positive habits, log daily check-ins, backfill missed entries, and track long-term consistency with precision.
+A full-stack habit tracking application engineered to measure streaks in **user-local calendar days** rather than raw elapsed hours. Build positive habits, log daily check-ins, backfill missed entries, and track long-term consistency with precision. Powered by Node.js, Express, Mongoose, MongoDB / MongoDB Atlas, React, and TypeScript.
 
 Repository: [https://github.com/Kishanfdt/Habbit-Tracker](https://github.com/Kishanfdt/Habbit-Tracker)
 
@@ -13,7 +13,7 @@ Repository: [https://github.com/Kishanfdt/Habbit-Tracker](https://github.com/Kis
 
 A streak is defined by consecutive **calendar days in the user's local timezone**, not by 24-hour elapsed windows.
 - Two check-ins 20 hours apart may fall on separate local days (incrementing the streak) or on the same local day (rejected as duplicate).
-- Database-level unique constraints strictly guarantee at most **one check-in per habit per local day**.
+- MongoDB compound unique index (`{ habit_id: 1, local_date: 1 }`) strictly guarantees at most **one check-in per habit per local day**.
 
 ### ⏰ Worked Example (`Asia/Kolkata`, UTC+05:30)
 
@@ -37,10 +37,10 @@ A streak is defined by consecutive **calendar days in the user's local timezone*
 
 ### Backend
 - **Runtime & Server**: Node.js, Express, TypeScript (`tsc`)
-- **Database**: PostgreSQL 15 (raw `pg` pool with custom DATE type parsing)
+- **Database & ODM**: MongoDB / MongoDB Atlas via **Mongoose**
 - **Validation**: Zod schema validation
 - **Authentication**: JWT (`jsonwebtoken`) with `bcryptjs` password hashing
-- **Testing**: Jest + Supertest
+- **Testing**: Jest + Supertest + `mongodb-memory-server`
 
 ### DevOps & Orchestration
 - **Containerization**: Docker & Docker Compose
@@ -49,17 +49,34 @@ A streak is defined by consecutive **calendar days in the user's local timezone*
 
 ---
 
+## 🍃 MongoDB Atlas Configuration & Setup
+
+### 1. Connection URI Format
+
+Set the `MONGODB_URI` environment variable in your `backend/.env`:
+
+```env
+MONGODB_URI=mongodb+srv://<username>:<password>@<cluster>.mongodb.net/habittracker?retryWrites=true&w=majority
+```
+
+### 2. Indexes & Schema Enforcement
+Mongoose automatically builds required indexes upon application start:
+- **`User` collection**: Unique index on `email`
+- **`CheckIn` collection**: Compound unique index on `{ habit_id: 1, local_date: 1 }`
+
+---
+
 ## 🚀 Quick Start
 
 ### 1. Prerequisites
 - [Docker](https://www.docker.com/) & Docker Compose, **OR**
-- [Node.js 20+](https://nodejs.org/) & [PostgreSQL 15+](https://www.postgresql.org/)
+- [Node.js 20+](https://nodejs.org/) & MongoDB instance (or MongoDB Atlas account)
 
 ---
 
 ### 2. Running with Docker Compose (Recommended)
 
-Start the full stack (PostgreSQL, Express Backend API, and React Frontend):
+Start the full stack (MongoDB, Express Backend API, and React Frontend):
 
 ```bash
 docker compose up --build
@@ -68,13 +85,13 @@ docker compose up --build
 Access the services:
 - **Frontend App**: [http://localhost:5173](http://localhost:5173)
 - **Backend API**: [http://localhost:3000/api](http://localhost:3000/api)
-- **PostgreSQL**: `localhost:5432` (`user: habittracker`, `password: password`, `db: habittracker`)
+- **MongoDB**: `localhost:27017`
 
 ---
 
 ### 3. Manual Local Setup (Development)
 
-#### Step A: Database & Backend
+#### Step A: Backend
 
 1. Navigate to the backend directory:
    ```bash
@@ -84,7 +101,7 @@ Access the services:
 
 2. Configure environment variables in `backend/.env`:
    ```env
-   DATABASE_URL=postgresql://habittracker:password@localhost:5432/habittracker
+   MONGODB_URI=mongodb+srv://<username>:<password>@<cluster>.mongodb.net/habittracker?retryWrites=true&w=majority
    JWT_SECRET=your-super-secret-jwt-key-min-32-characters
    JWT_EXPIRES_IN=7d
    PORT=3000
@@ -92,7 +109,7 @@ Access the services:
    CORS_ORIGIN=http://localhost:5173
    ```
 
-3. Run migrations & start development server:
+3. Sync database indexes & start development server:
    ```bash
    npm run migrate
    npm run dev
@@ -122,13 +139,12 @@ Access the services:
 
 ```
 .
-├── backend/                 # Node.js + Express + TypeScript Backend
-│   ├── migrations/         # PostgreSQL DDL migrations (001_init.sql)
+├── backend/                 # Node.js + Express + Mongoose + TypeScript Backend
 │   ├── src/
-│   │   ├── config/         # Database pool & migration runners
+│   │   ├── config/         # MongoDB database connection & index sync
 │   │   ├── controllers/    # Express route controllers
 │   │   ├── middleware/     # Auth, error handling, Zod validation
-│   │   ├── models/         # SQL query models (User, Habit, CheckIn)
+│   │   ├── models/         # Mongoose Schema Models (User, Habit, CheckIn)
 │   │   ├── routes/         # REST API routes
 │   │   ├── services/       # Core business & streak calculation logic
 │   │   ├── types/          # Shared backend TypeScript types
@@ -177,15 +193,18 @@ Access the services:
 Run tests across both frontend and backend projects:
 
 ```bash
-# Backend (Type-check & Jest tests)
+# Backend (Type-check & Jest tests with MongoMemoryServer)
 cd backend
+npm run lint
 npm run type-check
 npm test
 
 # Frontend (Type-check & Vitest tests)
 cd ../frontend
+npm run lint
 npm run type-check
 npm test
+npm run build
 ```
 
 ---

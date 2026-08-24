@@ -10,7 +10,7 @@ import { getErrorMessage } from '../services/api';
 export default function HabitDetailPage() {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
-  const habitId = Number(id);
+  const habitId = id!;
 
   const { data: habit, isLoading, error } = useHabit(habitId);
   const createCheckIn = useCreateCheckIn();

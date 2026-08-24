@@ -3,10 +3,10 @@ import * as CheckInModel from '../models/CheckIn';
 import { computeStreaks } from './streakService';
 import { getUserLocalToday } from '../utils/dateUtils';
 import { NotFoundError, ForbiddenError } from '../middleware/errors';
-import { Habit, HabitWithStreaks, HabitDetail } from '../types';
+import { Habit, HabitWithStreaks, HabitDetail, ID } from '../types';
 
 export async function createHabit(
-  userId: number,
+  userId: ID,
   name: string,
   description?: string
 ): Promise<Habit> {
@@ -14,7 +14,7 @@ export async function createHabit(
 }
 
 export async function getHabitsWithStreaks(
-  userId: number,
+  userId: ID,
   userTimezone: string
 ): Promise<HabitWithStreaks[]> {
   const habits = await HabitModel.findByUserId(userId);
@@ -35,15 +35,15 @@ export async function getHabitsWithStreaks(
 }
 
 export async function getHabitDetail(
-  habitId: number,
-  userId: number,
+  habitId: ID,
+  userId: ID,
   userTimezone: string
 ): Promise<HabitDetail> {
   const habit = await HabitModel.findById(habitId);
   if (!habit) {
     throw new NotFoundError('Habit not found');
   }
-  if (habit.user_id !== userId) {
+  if (String(habit.user_id) !== String(userId)) {
     throw new ForbiddenError('You do not own this habit');
   }
 
@@ -59,8 +59,8 @@ export async function getHabitDetail(
 }
 
 export async function updateHabit(
-  habitId: number,
-  userId: number,
+  habitId: ID,
+  userId: ID,
   name: string,
   description?: string
 ): Promise<Habit> {
@@ -68,7 +68,7 @@ export async function updateHabit(
   if (!habit) {
     throw new NotFoundError('Habit not found');
   }
-  if (habit.user_id !== userId) {
+  if (String(habit.user_id) !== String(userId)) {
     throw new ForbiddenError('You do not own this habit');
   }
 
@@ -77,14 +77,14 @@ export async function updateHabit(
 }
 
 export async function deleteHabit(
-  habitId: number,
-  userId: number
+  habitId: ID,
+  userId: ID
 ): Promise<void> {
   const habit = await HabitModel.findById(habitId);
   if (!habit) {
     throw new NotFoundError('Habit not found');
   }
-  if (habit.user_id !== userId) {
+  if (String(habit.user_id) !== String(userId)) {
     throw new ForbiddenError('You do not own this habit');
   }
 
