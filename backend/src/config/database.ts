@@ -8,12 +8,19 @@ dotenv.config();
 // Parse DATE column (OID 1082) directly as string 'YYYY-MM-DD' without timezone conversion
 types.setTypeParser(1082, (val: string) => val);
 
-const pool = new Pool({
-  connectionString: process.env.DATABASE_URL,
-});
+let pool: Pool | null = null;
+
+export function getPool(): Pool {
+  if (!pool || (pool as unknown as { ended?: boolean }).ended) {
+    pool = new Pool({
+      connectionString: process.env.DATABASE_URL,
+    });
+  }
+  return pool;
+}
 
 export async function query(text: string, params?: unknown[]): Promise<QueryResult> {
-  return pool.query(text, params);
+  return getPool().query(text, params);
 }
 
 export async function runMigrations(): Promise<void> {
@@ -25,14 +32,17 @@ export async function runMigrations(): Promise<void> {
       const filePath = path.join(migrationsDir, file);
       const sql = fs.readFileSync(filePath, 'utf-8');
       console.log(`Running migration: ${file}`);
-      await pool.query(sql);
+      await getPool().query(sql);
       console.log(`Migration complete: ${file}`);
     }
   }
 }
 
 export async function closePool(): Promise<void> {
-  await pool.end();
+  if (pool && !(pool as unknown as { ended?: boolean }).ended) {
+    await pool.end();
+    pool = null;
+  }
 }
 
 export default pool;

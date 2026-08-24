@@ -49,7 +49,7 @@ jobs:
       - name: Run tests
         run: npm test
         env:
-          DATABASE_URL: postgresql://test:test@localhost:5432/habittracker_test
+          DATABASE_URL: postgresql://test:test@127.0.0.1:5432/habittracker_test
           JWT_SECRET: ci-test-secret-key-at-least-32-chars-long
           NODE_ENV: test
 
