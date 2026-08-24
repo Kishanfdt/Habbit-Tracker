@@ -13,15 +13,10 @@ export async function setupTestDB(): Promise<void> {
   if (mongoose.connection.readyState === 1) {
     return;
   }
-  const uri = process.env.MONGODB_URI || process.env.DATABASE_URL;
-  if (uri) {
-    await connectDB(uri);
-  } else {
-    if (!mongoServer) {
-      mongoServer = await MongoMemoryServer.create();
-    }
-    await connectDB(mongoServer.getUri());
+  if (!mongoServer) {
+    mongoServer = await MongoMemoryServer.create();
   }
+  await connectDB(mongoServer.getUri());
 }
 
 export async function truncateAllTables(): Promise<void> {

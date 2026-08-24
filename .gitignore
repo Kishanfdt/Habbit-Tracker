@@ -28,5 +28,3 @@ npm-debug.log*
 # Test coverage
 coverage/
 
-# Docker
-postgres_data/

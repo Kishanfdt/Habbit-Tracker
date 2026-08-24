@@ -190,6 +190,8 @@ Access the services:
 
 ## 🧪 Testing & Verification
 
+> **Note**: `mongodb-memory-server` downloads a MongoDB binary on the first `npm test` run and requires internet access.
+
 Run tests across both frontend and backend projects:
 
 ```bash

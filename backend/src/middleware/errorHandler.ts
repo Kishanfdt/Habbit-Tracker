@@ -12,9 +12,9 @@ export function errorHandler(
     return;
   }
 
-  // Handle Postgres unique-violation (23505) or MongoDB duplicate key (11000)
+  // Handle MongoDB duplicate key error (11000)
   const code = (err as unknown as Record<string, unknown>).code;
-  if (code === '23505' || code === 11000 || code === '11000') {
+  if (code === 11000 || code === '11000') {
     res.status(409).json({ error: 'Already checked in for this date' });
     return;
   }

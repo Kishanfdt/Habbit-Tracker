@@ -40,7 +40,7 @@ export async function createCheckIn(
     return checkIn;
   } catch (err: unknown) {
     const code = (err as unknown as Record<string, unknown>).code;
-    if (code === '23505' || code === 11000 || code === '11000') {
+    if (code === 11000 || code === '11000') {
       throw new ConflictError('Already checked in for this date');
     }
     throw err;
