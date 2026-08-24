@@ -1,18 +1,10 @@
-import { Pool } from 'pg';
-import { runMigrations } from '../src/config/database';
+import pool, { runMigrations, closePool } from '../src/config/database';
 import dotenv from 'dotenv';
 
 dotenv.config();
 
-let pool: Pool;
-
-export async function setupTestDB(): Promise<Pool> {
-  pool = new Pool({
-    connectionString: process.env.TEST_DATABASE_URL || process.env.DATABASE_URL,
-  });
-
+export async function setupTestDB(): Promise<void> {
   await runMigrations();
-  return pool;
 }
 
 export async function truncateAllTables(): Promise<void> {
@@ -22,7 +14,7 @@ export async function truncateAllTables(): Promise<void> {
 }
 
 export async function closeTestDB(): Promise<void> {
-  await pool.end();
+  await closePool();
 }
 
 // Jest hooks

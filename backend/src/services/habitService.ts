@@ -1,7 +1,7 @@
 import * as HabitModel from '../models/Habit';
 import * as CheckInModel from '../models/CheckIn';
 import { computeStreaks } from './streakService';
-import { getUserLocalToday, utcToLocalDateStr } from '../utils/dateUtils';
+import { getUserLocalToday } from '../utils/dateUtils';
 import { NotFoundError, ForbiddenError } from '../middleware/errors';
 import { Habit, HabitWithStreaks, HabitDetail } from '../types';
 
