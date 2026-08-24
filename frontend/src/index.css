@@ -3,5 +3,5 @@
 @tailwind utilities;
 
 body {
-  @apply bg-gray-50 text-gray-900 antialiased;
+  @apply bg-[#fbfbfa] text-[#37352f] antialiased selection:bg-[#2383e2]/15 selection:text-[#2383e2];
 }

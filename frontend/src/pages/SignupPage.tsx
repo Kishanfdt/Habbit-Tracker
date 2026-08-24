@@ -5,21 +5,21 @@ export default function SignupPage() {
   const navigate = useNavigate();
 
   return (
-    <div className="flex min-h-screen items-center justify-center bg-gray-50 px-4">
-      <div className="w-full max-w-md">
+    <div className="flex min-h-screen items-center justify-center bg-[#fbfbfa] px-4">
+      <div className="w-full max-w-sm">
         <div className="text-center">
-          <h1 className="text-3xl font-bold text-gray-900">🔥 Habit Tracker</h1>
-          <p className="mt-2 text-sm text-gray-600">Create your account</p>
+          <h1 className="text-2xl font-semibold tracking-tight text-[#37352f]">🔥 Habit Tracker</h1>
+          <p className="mt-1 text-xs text-[#787774]">Create your account</p>
         </div>
 
-        <div className="mt-8 rounded-lg bg-white p-8 shadow-md">
+        <div className="mt-6 rounded-lg border border-[#e9e9e7] bg-white p-6">
           <SignupForm onSuccess={() => navigate('/dashboard')} />
 
-          <p className="mt-4 text-center text-sm text-gray-600">
+          <p className="mt-4 text-center text-xs text-[#787774]">
             Already have an account?{' '}
             <button
               onClick={() => navigate('/login')}
-              className="font-medium text-indigo-600 hover:text-indigo-500"
+              className="font-medium text-[#2383e2] hover:text-[#1d6bf3] transition-colors"
             >
               Log in
             </button>

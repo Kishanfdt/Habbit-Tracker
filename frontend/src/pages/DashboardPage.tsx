@@ -10,30 +10,30 @@ export default function DashboardPage() {
 
   if (isLoading) {
     return (
-      <div className="min-h-screen bg-slate-50">
+      <div className="min-h-screen bg-[#fbfbfa]">
         <Navbar />
-        <main className="mx-auto max-w-5xl px-4 sm:px-6 py-8">
+        <main className="mx-auto max-w-4xl px-6 py-8">
           <div className="flex items-center justify-between">
-            <div className="h-8 w-36 animate-pulse rounded-lg bg-slate-200" />
-            <div className="h-9 w-28 animate-pulse rounded-xl bg-slate-200" />
+            <div className="h-6 w-32 animate-pulse rounded bg-[#e9e9e7]" />
+            <div className="h-8 w-24 animate-pulse rounded-md bg-[#e9e9e7]" />
           </div>
 
-          <div className="mt-8 grid gap-5 sm:grid-cols-2">
+          <div className="mt-6 grid gap-4 sm:grid-cols-2">
             {[1, 2, 3, 4].map((i) => (
               <div
                 key={i}
-                className="h-44 animate-pulse rounded-2xl border border-slate-200/80 bg-white p-6 shadow-xs"
+                className="h-36 animate-pulse rounded-lg border border-[#e9e9e7] bg-white p-5"
               >
                 <div className="flex justify-between items-start">
                   <div className="space-y-2 flex-1">
-                    <div className="h-5 w-3/4 animate-pulse rounded-md bg-slate-200" />
-                    <div className="h-4 w-1/2 animate-pulse rounded-md bg-slate-100" />
+                    <div className="h-4 w-2/3 animate-pulse rounded bg-[#e9e9e7]" />
+                    <div className="h-3 w-1/2 animate-pulse rounded bg-[#f2f1ee]" />
                   </div>
-                  <div className="h-9 w-28 animate-pulse rounded-xl bg-slate-200" />
+                  <div className="h-7 w-24 animate-pulse rounded bg-[#e9e9e7]" />
                 </div>
-                <div className="mt-8 flex gap-3">
-                  <div className="h-14 w-28 animate-pulse rounded-xl bg-slate-100" />
-                  <div className="h-14 w-28 animate-pulse rounded-xl bg-slate-100" />
+                <div className="mt-6 flex gap-2">
+                  <div className="h-10 w-24 animate-pulse rounded bg-[#f2f1ee]" />
+                  <div className="h-10 w-24 animate-pulse rounded bg-[#f2f1ee]" />
                 </div>
               </div>
             ))}
@@ -45,10 +45,10 @@ export default function DashboardPage() {
 
   if (error) {
     return (
-      <div className="min-h-screen bg-slate-50">
+      <div className="min-h-screen bg-[#fbfbfa]">
         <Navbar />
-        <main className="mx-auto max-w-5xl px-4 sm:px-6 py-8">
-          <div className="rounded-xl border border-red-200 bg-red-50/80 p-4 text-sm font-semibold text-red-700 shadow-xs">
+        <main className="mx-auto max-w-4xl px-6 py-8">
+          <div className="rounded-md border border-red-200 bg-red-50 p-4 text-xs font-medium text-red-700">
             Failed to load habits. Please try again.
           </div>
         </main>
@@ -57,40 +57,41 @@ export default function DashboardPage() {
   }
 
   return (
-    <div className="min-h-screen bg-slate-50">
+    <div className="min-h-screen bg-[#fbfbfa]">
       <Navbar />
 
-      <main className="mx-auto max-w-5xl px-4 sm:px-6 py-8">
+      <main className="mx-auto max-w-4xl px-6 py-8">
         <div className="flex items-center justify-between">
-          <h1 className="text-2xl font-bold tracking-tight text-slate-900">My Habits</h1>
+          <div>
+            <h1 className="text-xl font-semibold tracking-tight text-[#37352f]">My Habits</h1>
+            <p className="mt-0.5 text-xs text-[#787774]">Track daily consistency in your local calendar timezone</p>
+          </div>
           <button
             onClick={() => setShowForm(true)}
-            className="rounded-xl bg-brand-600 px-4 py-2 text-sm font-semibold text-white hover:bg-brand-700 transition-all shadow-xs hover:shadow-md active:scale-95"
+            className="rounded-md bg-[#2383e2] px-3.5 py-1.5 text-xs font-medium text-white hover:bg-[#1d6bf3] transition-colors"
           >
             + New Habit
           </button>
         </div>
 
         {habits && habits.length === 0 ? (
-          <div className="mt-12 flex flex-col items-center justify-center rounded-2xl border border-dashed border-slate-300 bg-white p-12 text-center shadow-xs">
-            <div className="mx-auto flex h-14 w-14 items-center justify-center rounded-full bg-brand-50 text-2xl">
+          <div className="mt-10 flex flex-col items-center justify-center rounded-lg border border-dashed border-[#e9e9e7] bg-white p-10 text-center">
+            <div className="flex h-10 w-10 items-center justify-center rounded-md bg-[#f7f6f3] text-xl">
               🎯
             </div>
-            <h3 className="mt-4 text-lg font-bold tracking-tight text-slate-900">
-              No habits created yet
-            </h3>
-            <p className="mt-1.5 max-w-sm text-sm text-slate-500 leading-relaxed">
+            <h3 className="mt-3 text-sm font-semibold text-[#37352f]">No habits created yet</h3>
+            <p className="mt-1 max-w-xs text-xs text-[#787774] leading-relaxed">
               Start building your daily consistency by tracking your very first habit.
             </p>
             <button
               onClick={() => setShowForm(true)}
-              className="mt-6 inline-flex items-center justify-center rounded-xl bg-brand-600 px-5 py-2.5 text-sm font-semibold text-white shadow-xs hover:bg-brand-700 hover:shadow-md transition-all active:scale-95"
+              className="mt-5 rounded-md bg-[#2383e2] px-4 py-1.5 text-xs font-medium text-white hover:bg-[#1d6bf3] transition-colors"
             >
               + Create Your First Habit
             </button>
           </div>
         ) : (
-          <div className="mt-8 grid gap-5 sm:grid-cols-2">
+          <div className="mt-6 grid gap-4 sm:grid-cols-2">
             {habits?.map((habit) => (
               <HabitCard key={habit.id} habit={habit} />
             ))}

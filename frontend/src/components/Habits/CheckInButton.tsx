@@ -26,26 +26,24 @@ export default function CheckInButton({ habitId, checkedInToday }: Props) {
       <button
         onClick={handleCheckIn}
         disabled={checkedInToday || createCheckIn.isPending}
-        className={`relative flex items-center justify-center gap-1.5 px-4 py-2 rounded-xl text-sm font-semibold transition-all duration-200 ease-out active:scale-95 shadow-2xs ${
+        className={`inline-flex items-center gap-1.5 rounded-md px-3 py-1.5 text-xs font-medium transition-colors border ${
           checkedInToday
-            ? 'bg-emerald-100 text-emerald-800 cursor-default scale-100 border border-emerald-300/60'
-            : 'bg-brand-600 text-white hover:bg-brand-700 hover:shadow-md disabled:opacity-50 disabled:cursor-not-allowed'
+            ? 'bg-[#f7f6f3] text-[#787774] border-[#e9e9e7] cursor-default'
+            : 'bg-white text-[#37352f] border-[#e9e9e7] hover:bg-[#efefe0]/70 hover:border-[#d0d0ce] disabled:opacity-50'
         }`}
       >
         {checkedInToday ? (
-          <span className="inline-flex items-center gap-1 transition-all duration-300 transform scale-100">
+          <span className="flex items-center gap-1">
             <span>Done Today</span>
-            <span className="inline-block transform scale-110 font-extrabold text-emerald-700">✓</span>
+            <span className="text-[#059669] font-bold">✓</span>
           </span>
         ) : createCheckIn.isPending ? (
-          <span className="inline-flex items-center gap-1.5 animate-pulse">
-            <span>Saving...</span>
-          </span>
+          <span>Saving…</span>
         ) : (
           <span>Check In Today</span>
         )}
       </button>
-      {errorMsg && <p className="text-red-500 text-xs mt-1.5 font-medium">{errorMsg}</p>}
+      {errorMsg && <p className="text-xs text-[#dc2626] mt-1 font-normal">{errorMsg}</p>}
     </div>
   );
 }

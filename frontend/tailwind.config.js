@@ -4,18 +4,17 @@ export default {
   theme: {
     extend: {
       colors: {
-        brand: {
-          50: '#f5f3ff',
-          100: '#ede9fe',
-          500: '#6366f1',
-          600: '#4f46e5',
-          700: '#4338ca',
-        },
-        streak: {
-          50: '#fff7ed',
-          100: '#ffedd5',
-          500: '#f97316',
-          600: '#ea580c',
+        notion: {
+          bg: '#fbfbfa',
+          text: '#37352f',
+          muted: '#787774',
+          subtle: '#9b9a97',
+          border: '#e9e9e7',
+          hover: '#f7f6f3',
+          accent: '#2383e2',
+          accentHover: '#1d6bf3',
+          streak: '#d97706',
+          streakBg: '#fef3c7',
         },
       },
     },
