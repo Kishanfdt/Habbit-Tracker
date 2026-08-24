@@ -10,22 +10,20 @@ interface Props {
 export default function HabitCard({ habit }: Props) {
   return (
     <div
-      className={`group relative rounded-2xl border bg-white p-6 shadow-xs transition-all duration-200 ease-out hover:-translate-y-1 hover:shadow-lg ${
-        habit.checkedInToday
-          ? 'border-l-4 border-l-emerald-500 border-slate-200/80 bg-slate-50/30'
-          : 'border-slate-200/80 hover:border-slate-300'
+      className={`group rounded-lg border border-[#e9e9e7] bg-white p-5 transition-colors hover:bg-[#f7f6f3]/50 ${
+        habit.checkedInToday ? 'border-l-2 border-l-[#059669]' : ''
       }`}
     >
-      <div className="flex flex-col sm:flex-row sm:items-start justify-between gap-4">
+      <div className="flex items-start justify-between gap-4">
         <div className="flex-1 min-w-0">
           <Link
             to={`/habits/${habit.id}`}
-            className="text-lg font-bold tracking-tight text-slate-900 group-hover:text-brand-600 transition-colors line-clamp-1"
+            className="text-base font-semibold text-[#37352f] hover:text-[#2383e2] transition-colors"
           >
             {habit.name}
           </Link>
           {habit.description && (
-            <p className="mt-1.5 text-sm leading-relaxed text-slate-500 line-clamp-2">
+            <p className="mt-1 text-xs text-[#787774] leading-relaxed line-clamp-2">
               {habit.description}
             </p>
           )}
@@ -35,7 +33,7 @@ export default function HabitCard({ habit }: Props) {
         </div>
       </div>
 
-      <div className="mt-5 pt-4 border-t border-slate-100">
+      <div className="mt-4 pt-3.5 border-t border-[#f2f1ee]">
         <StreakDisplay streaks={habit.streaks} />
       </div>
     </div>
