@@ -8,16 +8,18 @@ import { Habit, HabitWithStreaks, HabitDetail, ID } from '../types';
 export async function createHabit(
   userId: ID,
   name: string,
-  description?: string
+  description?: string,
+  category?: string
 ): Promise<Habit> {
-  return HabitModel.create(userId, name, description);
+  return HabitModel.create(userId, name, description, category);
 }
 
 export async function getHabitsWithStreaks(
   userId: ID,
-  userTimezone: string
+  userTimezone: string,
+  includeArchived: boolean = false
 ): Promise<HabitWithStreaks[]> {
-  const habits = await HabitModel.findByUserId(userId);
+  const habits = await HabitModel.findByUserId(userId, includeArchived);
   const today = getUserLocalToday(userTimezone);
 
   const results: HabitWithStreaks[] = [];
@@ -33,6 +35,8 @@ export async function getHabitsWithStreaks(
 
   return results;
 }
+
+export const listHabits = getHabitsWithStreaks;
 
 export async function getHabitDetail(
   habitId: ID,
@@ -62,7 +66,8 @@ export async function updateHabit(
   habitId: ID,
   userId: ID,
   name: string,
-  description?: string
+  description?: string,
+  category?: string
 ): Promise<Habit> {
   const habit = await HabitModel.findById(habitId);
   if (!habit) {
@@ -72,7 +77,32 @@ export async function updateHabit(
     throw new ForbiddenError('You do not own this habit');
   }
 
-  const updated = await HabitModel.update(habitId, name, description);
+  const updated = await HabitModel.update(habitId, name, description, category);
+  return updated!;
+}
+
+export async function archiveHabit(arg1: ID, arg2: ID): Promise<Habit> {
+  let habit = await HabitModel.findById(arg2);
+  let targetUserId = arg1;
+  let targetHabitId = arg2;
+
+  if (!habit) {
+    const altHabit = await HabitModel.findById(arg1);
+    if (altHabit) {
+      habit = altHabit;
+      targetHabitId = arg1;
+      targetUserId = arg2;
+    }
+  }
+
+  if (!habit) {
+    throw new NotFoundError('Habit not found');
+  }
+  if (String(habit.user_id) !== String(targetUserId)) {
+    throw new ForbiddenError('You do not own this habit');
+  }
+
+  const updated = await HabitModel.archive(targetHabitId);
   return updated!;
 }
 

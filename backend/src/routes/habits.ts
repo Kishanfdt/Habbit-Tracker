@@ -15,6 +15,7 @@ router.post('/', validate(createHabitSchema), habitController.create);
 router.get('/', habitController.getAll);
 router.get('/:id', habitController.getById);
 router.put('/:id', validate(updateHabitSchema), habitController.update);
+router.patch('/:id/archive', habitController.archive);
 router.delete('/:id', habitController.remove);
 
 // Check-in sub-routes

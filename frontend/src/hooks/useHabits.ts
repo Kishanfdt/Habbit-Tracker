@@ -2,10 +2,10 @@ import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import * as api from '../services/api';
 import { ID } from '../types';
 
-export function useHabits() {
+export function useHabits(includeArchived?: boolean) {
   return useQuery({
-    queryKey: ['habits'],
-    queryFn: api.getHabits,
+    queryKey: ['habits', { includeArchived }],
+    queryFn: () => api.getHabits(includeArchived),
   });
 }
 
@@ -19,8 +19,15 @@ export function useHabit(id: ID) {
 export function useCreateHabit() {
   const qc = useQueryClient();
   return useMutation({
-    mutationFn: ({ name, description }: { name: string; description?: string }) =>
-      api.createHabit(name, description),
+    mutationFn: ({
+      name,
+      description,
+      category,
+    }: {
+      name: string;
+      description?: string;
+      category?: string;
+    }) => api.createHabit(name, description, category),
     onSuccess: () => qc.invalidateQueries({ queryKey: ['habits'] }),
   });
 }
@@ -33,8 +40,16 @@ export function useUpdateHabit() {
       updates,
     }: {
       id: ID;
-      updates: { name?: string; description?: string };
+      updates: { name?: string; description?: string; category?: string };
     }) => api.updateHabit(id, updates),
+    onSuccess: () => qc.invalidateQueries({ queryKey: ['habits'] }),
+  });
+}
+
+export function useArchiveHabit() {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: (id: ID) => api.archiveHabit(id),
     onSuccess: () => qc.invalidateQueries({ queryKey: ['habits'] }),
   });
 }

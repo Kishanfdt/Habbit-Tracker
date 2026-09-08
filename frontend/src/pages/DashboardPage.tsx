@@ -4,9 +4,20 @@ import HabitCard from '../components/Habits/HabitCard';
 import HabitForm from '../components/Habits/HabitForm';
 import { useHabits } from '../hooks/useHabits';
 
+const CATEGORIES = ['all', 'health', 'productivity', 'learning', 'fitness', 'other'];
+
 export default function DashboardPage() {
-  const { data: habits, isLoading, error } = useHabits();
+  const [showArchived, setShowArchived] = useState(false);
+  const [categoryFilter, setCategoryFilter] = useState('all');
+  const { data: habits, isLoading, error } = useHabits(showArchived);
   const [showForm, setShowForm] = useState(false);
+
+  const filteredHabits = habits?.filter((habit) => {
+    if (categoryFilter !== 'all' && (habit.category || 'other') !== categoryFilter) {
+      return false;
+    }
+    return true;
+  });
 
   if (isLoading) {
     return (
@@ -74,25 +85,55 @@ export default function DashboardPage() {
           </button>
         </div>
 
-        {habits && habits.length === 0 ? (
+        <div className="mt-4 flex flex-wrap items-center justify-between gap-4 border-b border-[#e9e9e7] pb-3">
+          <div className="flex flex-wrap gap-1 text-xs">
+            {CATEGORIES.map((cat) => (
+              <button
+                key={cat}
+                onClick={() => setCategoryFilter(cat)}
+                className={`rounded-md px-2.5 py-1 font-medium capitalize transition-colors ${
+                  categoryFilter === cat
+                    ? 'bg-[#2383e2] text-white'
+                    : 'bg-[#f7f6f3] text-[#787774] hover:bg-[#e9e9e7] hover:text-[#37352f]'
+                }`}
+              >
+                {cat}
+              </button>
+            ))}
+          </div>
+
+          <label className="flex items-center gap-2 text-xs font-medium text-[#787774] cursor-pointer select-none">
+            <input
+              type="checkbox"
+              checked={showArchived}
+              onChange={(e) => setShowArchived(e.target.checked)}
+              className="h-3.5 w-3.5 rounded border-[#e9e9e7] text-[#2383e2] focus:ring-0"
+            />
+            Show archived
+          </label>
+        </div>
+
+        {filteredHabits && filteredHabits.length === 0 ? (
           <div className="mt-10 flex flex-col items-center justify-center rounded-lg border border-dashed border-[#e9e9e7] bg-white p-10 text-center">
             <div className="flex h-10 w-10 items-center justify-center rounded-md bg-[#f7f6f3] text-xl">
               🎯
             </div>
-            <h3 className="mt-3 text-sm font-semibold text-[#37352f]">No habits created yet</h3>
+            <h3 className="mt-3 text-sm font-semibold text-[#37352f]">No habits found</h3>
             <p className="mt-1 max-w-xs text-xs text-[#787774] leading-relaxed">
-              Start building your daily consistency by tracking your very first habit.
+              {categoryFilter !== 'all'
+                ? `No habits match the category "${categoryFilter}".`
+                : 'Start building your daily consistency by tracking your very first habit.'}
             </p>
             <button
               onClick={() => setShowForm(true)}
               className="mt-5 rounded-md bg-[#2383e2] px-4 py-1.5 text-xs font-medium text-white hover:bg-[#1d6bf3] transition-colors"
             >
-              + Create Your First Habit
+              + Create Habit
             </button>
           </div>
         ) : (
           <div className="mt-6 grid gap-4 sm:grid-cols-2">
-            {habits?.map((habit) => (
+            {filteredHabits?.map((habit) => (
               <HabitCard key={habit.id} habit={habit} />
             ))}
           </div>

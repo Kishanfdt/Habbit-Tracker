@@ -8,11 +8,15 @@ export interface User {
   created_at: Date;
 }
 
+export type HabitCategory = 'health' | 'productivity' | 'learning' | 'fitness' | 'other';
+
 export interface Habit {
   id: ID;
   user_id: ID;
   name: string;
   description: string | null;
+  category?: string;
+  archived?: boolean;
   created_at: Date;
 }
 
