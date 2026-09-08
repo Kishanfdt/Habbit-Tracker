@@ -3,6 +3,7 @@ import { useState, useMemo } from 'react';
 import { format, parseISO, subDays } from 'date-fns';
 import Navbar from '../components/Layout/Navbar';
 import StreakDisplay from '../components/Habits/StreakDisplay';
+import HabitTrendChart from '../components/Analytics/HabitTrendChart';
 import CheckInButton from '../components/Habits/CheckInButton';
 import { useHabit, useCreateCheckIn, useDeleteHabit } from '../hooks/useHabits';
 import { getErrorMessage } from '../services/api';
@@ -119,6 +120,9 @@ export default function HabitDetailPage() {
             <StreakDisplay streaks={habit.streaks} size="lg" />
           </div>
         </div>
+
+        {/* Habit Trend Chart */}
+        <HabitTrendChart habitId={habitId} />
 
         {/* Check-in Heatmap */}
         <div className="mt-6 rounded-lg border border-[#e9e9e7] bg-white p-6">

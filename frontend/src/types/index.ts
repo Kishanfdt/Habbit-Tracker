@@ -52,3 +52,21 @@ export interface ApiError {
   error: string;
   message: string;
 }
+
+export interface OverviewStats {
+  totalHabits: number;
+  activeStreaksCount: number;
+  completionRate7d: number;
+  completionRate30d: number;
+}
+
+export interface HabitTrendPoint {
+  date: string;
+  checkedIn: boolean;
+}
+
+export interface HabitAnalyticsResponse {
+  habitId: ID;
+  days: number;
+  trend: HabitTrendPoint[];
+}

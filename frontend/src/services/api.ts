@@ -1,5 +1,5 @@
 import axios from 'axios';
-import { AuthResponse, Habit, HabitWithStreaks, HabitDetail, CheckIn, User, ID } from '../types';
+import { AuthResponse, Habit, HabitWithStreaks, HabitDetail, CheckIn, User, ID, OverviewStats, HabitAnalyticsResponse } from '../types';
 
 const API_BASE_URL =
   import.meta.env.VITE_API_URL || 'http://localhost:3000/api';
@@ -126,4 +126,17 @@ export async function getCheckIns(habitId: ID): Promise<CheckIn[]> {
     `/habits/${habitId}/check-ins`,
   );
   return data.checkIns;
+}
+
+// ── Analytics ──────────────────────────────────────────
+export async function getOverviewAnalytics(): Promise<OverviewStats> {
+  const { data } = await api.get<OverviewStats>('/analytics/overview');
+  return data;
+}
+
+export async function getHabitAnalytics(id: ID, days: number = 30): Promise<HabitAnalyticsResponse> {
+  const { data } = await api.get<HabitAnalyticsResponse>(`/habits/${id}/analytics`, {
+    params: { days },
+  });
+  return data;
 }

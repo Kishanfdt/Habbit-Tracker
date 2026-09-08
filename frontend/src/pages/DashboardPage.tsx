@@ -2,6 +2,7 @@ import { useState } from 'react';
 import Navbar from '../components/Layout/Navbar';
 import HabitCard from '../components/Habits/HabitCard';
 import HabitForm from '../components/Habits/HabitForm';
+import OverviewStats from '../components/Analytics/OverviewStats';
 import { useHabits } from '../hooks/useHabits';
 
 const CATEGORIES = ['all', 'health', 'productivity', 'learning', 'fitness', 'other'];
@@ -85,7 +86,11 @@ export default function DashboardPage() {
           </button>
         </div>
 
-        <div className="mt-4 flex flex-wrap items-center justify-between gap-4 border-b border-[#e9e9e7] pb-3">
+        <div className="mt-6">
+          <OverviewStats />
+        </div>
+
+        <div className="mt-6 flex flex-wrap items-center justify-between gap-4 border-b border-[#e9e9e7] pb-3">
           <div className="flex flex-wrap gap-1 text-xs">
             {CATEGORIES.map((cat) => (
               <button
