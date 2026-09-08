@@ -7,11 +7,15 @@ export interface User {
   created_at: string;
 }
 
+export type HabitCategory = 'health' | 'productivity' | 'learning' | 'fitness' | 'other';
+
 export interface Habit {
   id: ID;
   user_id: ID;
   name: string;
   description: string | null;
+  category?: HabitCategory | string;
+  archived?: boolean;
   created_at: string;
 }
 

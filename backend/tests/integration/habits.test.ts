@@ -51,8 +51,25 @@ describe('Habits Integration Tests', () => {
         user_id: expect.anything(),
         name: 'Read a Book',
         description: '10 pages of a book',
+        category: 'other',
+        archived: false,
         created_at: expect.any(String),
       });
+    });
+
+    test('Create habit with specified category should return 201', async () => {
+      const res = await request(app)
+        .post('/api/habits')
+        .set('Authorization', `Bearer ${token1}`)
+        .send({
+          name: 'Morning Workout',
+          description: '30 mins of exercise',
+          category: 'fitness',
+        });
+
+      expect(res.status).toBe(201);
+      expect(res.body.category).toBe('fitness');
+      expect(res.body.archived).toBe(false);
     });
 
     test('Create habit with missing name should return 400', async () => {
@@ -90,6 +107,35 @@ describe('Habits Integration Tests', () => {
 
       expect(res.status).toBe(200);
       expect(res.body.habits).toEqual([]);
+    });
+
+    test('Should exclude archived habits by default and include them with includeArchived=true', async () => {
+      const habitRes = await request(app)
+        .post('/api/habits')
+        .set('Authorization', `Bearer ${token1}`)
+        .send({
+          name: 'Old Habit',
+          category: 'other',
+        });
+      const archivedHabitId = habitRes.body.id;
+
+      await request(app)
+        .patch(`/api/habits/${archivedHabitId}/archive`)
+        .set('Authorization', `Bearer ${token1}`);
+
+      const resDefault = await request(app)
+        .get('/api/habits')
+        .set('Authorization', `Bearer ${token1}`);
+      expect(resDefault.status).toBe(200);
+      const defaultIds = resDefault.body.habits.map((h: any) => h.id);
+      expect(defaultIds).not.toContain(archivedHabitId);
+
+      const resWithArchived = await request(app)
+        .get('/api/habits?includeArchived=true')
+        .set('Authorization', `Bearer ${token1}`);
+      expect(resWithArchived.status).toBe(200);
+      const withArchivedIds = resWithArchived.body.habits.map((h: any) => h.id);
+      expect(withArchivedIds).toContain(archivedHabitId);
     });
   });
 
@@ -144,6 +190,25 @@ describe('Habits Integration Tests', () => {
         .send({
           name: 'Drink More Water',
         });
+
+      expect(res.status).toBe(403);
+    });
+  });
+
+  describe('PATCH /api/habits/:id/archive', () => {
+    test('Archive own habit should return 200 and set archived=true', async () => {
+      const res = await request(app)
+        .patch(`/api/habits/${habitId}/archive`)
+        .set('Authorization', `Bearer ${token1}`);
+
+      expect(res.status).toBe(200);
+      expect(res.body.archived).toBe(true);
+    });
+
+    test('Archive another user\'s habit should return 403', async () => {
+      const res = await request(app)
+        .patch(`/api/habits/${habitId}/archive`)
+        .set('Authorization', `Bearer ${token2}`);
 
       expect(res.status).toBe(403);
     });

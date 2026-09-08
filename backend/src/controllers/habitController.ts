@@ -4,8 +4,8 @@ import * as habitService from '../services/habitService';
 export async function create(req: Request, res: Response, next: NextFunction) {
   try {
     if (!req.user) return res.status(401).json({ error: 'Unauthorized' });
-    const { name, description } = req.body;
-    const habit = await habitService.createHabit(req.user.id, name, description);
+    const { name, description, category } = req.body;
+    const habit = await habitService.createHabit(req.user.id, name, description, category);
     res.status(201).json(habit);
   } catch (error) {
     next(error);
@@ -15,7 +15,8 @@ export async function create(req: Request, res: Response, next: NextFunction) {
 export async function getAll(req: Request, res: Response, next: NextFunction) {
   try {
     if (!req.user) return res.status(401).json({ error: 'Unauthorized' });
-    const habits = await habitService.getHabitsWithStreaks(req.user.id, req.user.timezone);
+    const includeArchived = req.query.includeArchived === 'true';
+    const habits = await habitService.getHabitsWithStreaks(req.user.id, req.user.timezone, includeArchived);
     res.json({ habits });
   } catch (error) {
     next(error);
@@ -41,13 +42,25 @@ export async function update(req: Request, res: Response, next: NextFunction) {
   try {
     if (!req.user) return res.status(401).json({ error: 'Unauthorized' });
     const { id } = req.params;
-    const { name, description } = req.body;
+    const { name, description, category } = req.body;
     const habit = await habitService.updateHabit(
       id,
       req.user.id,
       name,
-      description
+      description,
+      category
     );
+    res.json(habit);
+  } catch (error) {
+    next(error);
+  }
+}
+
+export async function archive(req: Request, res: Response, next: NextFunction) {
+  try {
+    if (!req.user) return res.status(401).json({ error: 'Unauthorized' });
+    const { id } = req.params;
+    const habit = await habitService.archiveHabit(req.user.id, id);
     res.json(habit);
   } catch (error) {
     next(error);

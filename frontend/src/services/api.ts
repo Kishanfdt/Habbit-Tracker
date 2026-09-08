@@ -67,8 +67,9 @@ export async function getMe(): Promise<User> {
 }
 
 // ── Habits ─────────────────────────────────────────────
-export async function getHabits(): Promise<HabitWithStreaks[]> {
-  const { data } = await api.get<{ habits: HabitWithStreaks[] }>('/habits');
+export async function getHabits(includeArchived?: boolean): Promise<HabitWithStreaks[]> {
+  const params = includeArchived ? { includeArchived: true } : {};
+  const { data } = await api.get<{ habits: HabitWithStreaks[] }>('/habits', { params });
   return data.habits;
 }
 
@@ -80,19 +81,26 @@ export async function getHabit(id: ID): Promise<HabitDetail> {
 export async function createHabit(
   name: string,
   description?: string,
+  category?: string,
 ): Promise<Habit> {
   const { data } = await api.post<Habit>('/habits', {
     name,
     description,
+    category,
   });
   return data;
 }
 
 export async function updateHabit(
   id: ID,
-  updates: { name?: string; description?: string },
+  updates: { name?: string; description?: string; category?: string },
 ): Promise<Habit> {
   const { data } = await api.put<Habit>(`/habits/${id}`, updates);
+  return data;
+}
+
+export async function archiveHabit(id: ID): Promise<Habit> {
+  const { data } = await api.patch<Habit>(`/habits/${id}/archive`);
   return data;
 }
 

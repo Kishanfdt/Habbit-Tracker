@@ -10,13 +10,14 @@ export default function HabitForm({ onClose }: Props) {
   const create = useCreateHabit();
   const [name, setName] = useState('');
   const [description, setDescription] = useState('');
+  const [category, setCategory] = useState('other');
   const [error, setError] = useState('');
 
   const handleSubmit = async (e: FormEvent) => {
     e.preventDefault();
     setError('');
     try {
-      await create.mutateAsync({ name, description: description || undefined });
+      await create.mutateAsync({ name, description: description || undefined, category });
       onClose();
     } catch (err) {
       setError(getErrorMessage(err));
@@ -47,6 +48,24 @@ export default function HabitForm({ onClose }: Props) {
               placeholder="e.g. Drink water, Read, Run"
               className="mt-1 block w-full rounded-md border border-[#e9e9e7] bg-[#fbfbfa] px-3 py-1.5 text-sm text-[#37352f] placeholder-[#9b9a97] focus:border-[#2383e2] focus:bg-white focus:outline-none"
             />
+          </div>
+
+          <div>
+            <label htmlFor="habit-category" className="block text-xs font-medium text-[#787774]">
+              Category
+            </label>
+            <select
+              id="habit-category"
+              value={category}
+              onChange={(e) => setCategory(e.target.value)}
+              className="mt-1 block w-full rounded-md border border-[#e9e9e7] bg-[#fbfbfa] px-3 py-1.5 text-sm text-[#37352f] focus:border-[#2383e2] focus:bg-white focus:outline-none capitalize"
+            >
+              <option value="health">Health</option>
+              <option value="productivity">Productivity</option>
+              <option value="learning">Learning</option>
+              <option value="fitness">Fitness</option>
+              <option value="other">Other</option>
+            </select>
           </div>
 
           <div>
