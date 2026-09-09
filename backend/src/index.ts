@@ -5,16 +5,21 @@ import dotenv from 'dotenv';
 import routes from './routes';
 import { errorHandler } from './middleware/errorHandler';
 import { runMigrations } from './config/database';
+import { validateEnv } from './config/env';
+import { logger } from './utils/logger';
 
 dotenv.config();
 
+// Parse and validate process.env once at startup
+const env = validateEnv();
+
 export const app = express();
-const PORT = process.env.PORT || 3000;
+const PORT = env.PORT;
 
 app.use(helmet());
 app.use(cors({
-  origin: process.env.CORS_ORIGIN || 'http://localhost:5173',
-  credentials: true
+  origin: env.CORS_ORIGIN,
+  credentials: true,
 }));
 app.use(express.json());
 
@@ -30,18 +35,18 @@ app.use(errorHandler);
 
 export function startServer() {
   const server = app.listen(PORT, async () => {
-    console.log(`Server running on port ${PORT}`);
-    if (process.env.NODE_ENV !== 'test') {
+    logger.info(`Server running on port ${PORT}`);
+    if (env.NODE_ENV !== 'test') {
       try {
         await runMigrations();
       } catch (error) {
-        console.error('Failed to run migrations on startup:', error);
+        logger.error({ err: error }, 'Failed to run migrations on startup');
       }
     }
   });
   return server;
 }
 
-if (process.env.NODE_ENV !== 'test') {
+if (env.NODE_ENV !== 'test') {
   startServer();
 }

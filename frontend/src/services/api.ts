@@ -1,5 +1,5 @@
 import axios from 'axios';
-import { AuthResponse, Habit, HabitWithStreaks, HabitDetail, CheckIn, User, ID, OverviewStats, HabitAnalyticsResponse } from '../types';
+import { AuthResponse, Habit, HabitWithStreaks, HabitDetail, CheckIn, User, ID, OverviewStats, HabitAnalyticsResponse, PaginatedResponse } from '../types';
 
 const API_BASE_URL =
   import.meta.env.VITE_API_URL || 'http://localhost:3000/api';
@@ -67,10 +67,15 @@ export async function getMe(): Promise<User> {
 }
 
 // ── Habits ─────────────────────────────────────────────
-export async function getHabits(includeArchived?: boolean): Promise<HabitWithStreaks[]> {
-  const params = includeArchived ? { includeArchived: true } : {};
-  const { data } = await api.get<{ habits: HabitWithStreaks[] }>('/habits', { params });
-  return data.habits;
+export async function getHabits(
+  includeArchived?: boolean,
+  page: number = 1,
+  limit: number = 20
+): Promise<PaginatedResponse<HabitWithStreaks>> {
+  const params: Record<string, unknown> = { page, limit };
+  if (includeArchived) params.includeArchived = true;
+  const { data } = await api.get<PaginatedResponse<HabitWithStreaks>>('/habits', { params });
+  return data;
 }
 
 export async function getHabit(id: ID): Promise<HabitDetail> {
@@ -121,11 +126,16 @@ export async function createCheckIn(
   return data;
 }
 
-export async function getCheckIns(habitId: ID): Promise<CheckIn[]> {
-  const { data } = await api.get<{ checkIns: CheckIn[] }>(
+export async function getCheckIns(
+  habitId: ID,
+  page: number = 1,
+  limit: number = 20
+): Promise<PaginatedResponse<CheckIn>> {
+  const { data } = await api.get<PaginatedResponse<CheckIn>>(
     `/habits/${habitId}/check-ins`,
+    { params: { page, limit } }
   );
-  return data.checkIns;
+  return data;
 }
 
 // ── Analytics ──────────────────────────────────────────

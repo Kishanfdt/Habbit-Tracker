@@ -15,3 +15,18 @@ export function validate(schema: ZodSchema) {
     next();
   };
 }
+
+export function validateQuery(schema: ZodSchema) {
+  return (req: Request, _res: Response, next: NextFunction): void => {
+    const result = schema.safeParse(req.query);
+    if (!result.success) {
+      const message = result.error.errors
+        .map((e) => `${e.path.join('.')}: ${e.message}`)
+        .join(', ');
+      throw new ValidationError(message);
+    }
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    req.query = result.data as any;
+    next();
+  };
+}

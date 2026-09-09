@@ -9,7 +9,7 @@ export async function getOverview(req: Request, res: Response, next: NextFunctio
   try {
     if (!req.user) return res.status(401).json({ error: 'Unauthorized' });
 
-    const habits = await habitService.getHabitsWithStreaks(req.user.id, req.user.timezone);
+    const { habits } = await habitService.getHabitsWithStreaks(req.user.id, req.user.timezone);
     const checkInsByHabit: Record<string, string[]> = {};
 
     for (const habit of habits) {

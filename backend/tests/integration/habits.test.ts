@@ -92,12 +92,18 @@ describe('Habits Integration Tests', () => {
         .set('Authorization', `Bearer ${token1}`);
 
       expect(res.status).toBe(200);
-      expect(res.body.habits).toBeInstanceOf(Array);
-      expect(res.body.habits.length).toBe(1);
-      expect(res.body.habits[0]).toHaveProperty('name', 'Drink Water');
-      expect(res.body.habits[0]).toHaveProperty('description', 'Drink 3L of water daily');
-      expect(res.body.habits[0]).toHaveProperty('streaks');
-      expect(res.body.habits[0]).toHaveProperty('checkedInToday');
+      expect(res.body.data).toBeInstanceOf(Array);
+      expect(res.body.data.length).toBe(1);
+      expect(res.body.data[0]).toHaveProperty('name', 'Drink Water');
+      expect(res.body.data[0]).toHaveProperty('description', 'Drink 3L of water daily');
+      expect(res.body.data[0]).toHaveProperty('streaks');
+      expect(res.body.data[0]).toHaveProperty('checkedInToday');
+      expect(res.body.pagination).toEqual({
+        page: 1,
+        limit: 20,
+        total: 1,
+        totalPages: 1,
+      });
     });
 
     test('Should return empty list for user with no habits', async () => {
@@ -106,7 +112,13 @@ describe('Habits Integration Tests', () => {
         .set('Authorization', `Bearer ${token2}`);
 
       expect(res.status).toBe(200);
-      expect(res.body.habits).toEqual([]);
+      expect(res.body.data).toEqual([]);
+      expect(res.body.pagination).toEqual({
+        page: 1,
+        limit: 20,
+        total: 0,
+        totalPages: 0,
+      });
     });
 
     test('Should exclude archived habits by default and include them with includeArchived=true', async () => {
@@ -127,15 +139,56 @@ describe('Habits Integration Tests', () => {
         .get('/api/habits')
         .set('Authorization', `Bearer ${token1}`);
       expect(resDefault.status).toBe(200);
-      const defaultIds = resDefault.body.habits.map((h: any) => h.id);
+      const defaultIds = resDefault.body.data.map((h: any) => h.id);
       expect(defaultIds).not.toContain(archivedHabitId);
 
       const resWithArchived = await request(app)
         .get('/api/habits?includeArchived=true')
         .set('Authorization', `Bearer ${token1}`);
       expect(resWithArchived.status).toBe(200);
-      const withArchivedIds = resWithArchived.body.habits.map((h: any) => h.id);
+      const withArchivedIds = resWithArchived.body.data.map((h: any) => h.id);
       expect(withArchivedIds).toContain(archivedHabitId);
+    });
+
+    test('Should support page and limit pagination query params', async () => {
+      await request(app)
+        .post('/api/habits')
+        .set('Authorization', `Bearer ${token1}`)
+        .send({ name: 'Habit 2' });
+      await request(app)
+        .post('/api/habits')
+        .set('Authorization', `Bearer ${token1}`)
+        .send({ name: 'Habit 3' });
+
+      const page1Res = await request(app)
+        .get('/api/habits?page=1&limit=2')
+        .set('Authorization', `Bearer ${token1}`);
+
+      expect(page1Res.status).toBe(200);
+      expect(page1Res.body.data.length).toBe(2);
+      expect(page1Res.body.pagination).toEqual({
+        page: 1,
+        limit: 2,
+        total: 3,
+        totalPages: 2,
+      });
+
+      const page2Res = await request(app)
+        .get('/api/habits?page=2&limit=2')
+        .set('Authorization', `Bearer ${token1}`);
+
+      expect(page2Res.status).toBe(200);
+      expect(page2Res.body.data.length).toBe(1);
+      expect(page2Res.body.pagination.page).toBe(2);
+    });
+
+    test('Should reject limit > 100 with 400', async () => {
+      const res = await request(app)
+        .get('/api/habits?limit=101')
+        .set('Authorization', `Bearer ${token1}`);
+
+      expect(res.status).toBe(400);
+      expect(res.body.error).toContain('limit');
     });
   });
 
@@ -235,6 +288,13 @@ describe('Habits Integration Tests', () => {
         .set('Authorization', `Bearer ${token2}`);
 
       expect(res.status).toBe(403);
+    });
+  });
+
+  describe('GET /api/docs', () => {
+    test('Should serve Swagger UI documentation or redirect', async () => {
+      const res = await request(app).get('/api/docs/');
+      expect([200, 301, 302]).toContain(res.status);
     });
   });
 });

@@ -5,7 +5,7 @@ import Navbar from '../components/Layout/Navbar';
 import StreakDisplay from '../components/Habits/StreakDisplay';
 import HabitTrendChart from '../components/Analytics/HabitTrendChart';
 import CheckInButton from '../components/Habits/CheckInButton';
-import { useHabit, useCreateCheckIn, useDeleteHabit } from '../hooks/useHabits';
+import { useHabit, useHabitCheckIns, useCreateCheckIn, useDeleteHabit } from '../hooks/useHabits';
 import { getErrorMessage } from '../services/api';
 
 export default function HabitDetailPage() {
@@ -19,6 +19,8 @@ export default function HabitDetailPage() {
 
   const [backfillDate, setBackfillDate] = useState('');
   const [backfillError, setBackfillError] = useState('');
+  const [checkInPage, setCheckInPage] = useState(1);
+  const { data: checkInsPageData, isLoading: isLoadingCheckIns } = useHabitCheckIns(habitId, checkInPage, 10);
 
   const past90Days = useMemo(() => {
     const days: string[] = [];
@@ -192,16 +194,23 @@ export default function HabitDetailPage() {
 
         {/* Check-in History */}
         <div className="mt-6 rounded-lg border border-[#e9e9e7] bg-white p-6">
-          <h2 className="text-sm font-semibold text-[#37352f]">Check-in History</h2>
+          <div className="flex items-center justify-between">
+            <h2 className="text-sm font-semibold text-[#37352f]">Check-in History</h2>
+            {checkInsPageData?.pagination && (
+              <span className="text-xs text-[#787774]">
+                Page {checkInsPageData.pagination.page} of {Math.max(1, checkInsPageData.pagination.totalPages)} ({checkInsPageData.pagination.total} total)
+              </span>
+            )}
+          </div>
 
-          {habit.checkIns.length === 0 ? (
+          {isLoadingCheckIns ? (
+            <p className="mt-3 text-xs text-[#787774]">Loading check-ins…</p>
+          ) : (checkInsPageData?.data ?? habit.checkIns).length === 0 ? (
             <p className="mt-3 text-xs text-[#787774]">No check-ins yet.</p>
           ) : (
-            <div className="mt-3 space-y-1.5">
-              {habit.checkIns
-                .slice()
-                .reverse()
-                .map((checkIn) => (
+            <>
+              <div className="mt-3 space-y-1.5">
+                {(checkInsPageData?.data ?? habit.checkIns.slice().reverse()).map((checkIn) => (
                   <div
                     key={checkIn.id}
                     className="flex items-center justify-between rounded-md border border-[#e9e9e7] bg-[#fbfbfa] px-3.5 py-2 text-xs"
@@ -217,7 +226,33 @@ export default function HabitDetailPage() {
                     <span className="font-semibold text-[#059669]">✓</span>
                   </div>
                 ))}
-            </div>
+              </div>
+
+              {/* Pagination controls */}
+              {checkInsPageData?.pagination && checkInsPageData.pagination.totalPages > 1 && (
+                <div className="mt-4 flex items-center justify-between border-t border-[#f2f1ee] pt-3">
+                  <button
+                    type="button"
+                    onClick={() => setCheckInPage((p) => Math.max(1, p - 1))}
+                    disabled={checkInPage <= 1}
+                    className="rounded border border-[#e9e9e7] px-2.5 py-1 text-xs font-medium text-[#37352f] hover:bg-[#f7f6f3] disabled:opacity-40 transition-colors"
+                  >
+                    ← Previous
+                  </button>
+                  <span className="text-xs text-[#787774]">
+                    Page {checkInsPageData.pagination.page} of {checkInsPageData.pagination.totalPages}
+                  </span>
+                  <button
+                    type="button"
+                    onClick={() => setCheckInPage((p) => Math.min(checkInsPageData.pagination.totalPages, p + 1))}
+                    disabled={checkInPage >= checkInsPageData.pagination.totalPages}
+                    className="rounded border border-[#e9e9e7] px-2.5 py-1 text-xs font-medium text-[#37352f] hover:bg-[#f7f6f3] disabled:opacity-40 transition-colors"
+                  >
+                    Next →
+                  </button>
+                </div>
+              )}
+            </>
           )}
         </div>
       </main>
