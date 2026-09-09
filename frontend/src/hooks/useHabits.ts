@@ -2,10 +2,17 @@ import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import * as api from '../services/api';
 import { ID } from '../types';
 
-export function useHabits(includeArchived?: boolean) {
+export function useHabits(includeArchived?: boolean, page: number = 1, limit: number = 20) {
   return useQuery({
-    queryKey: ['habits', { includeArchived }],
-    queryFn: () => api.getHabits(includeArchived),
+    queryKey: ['habits', { includeArchived, page, limit }],
+    queryFn: () => api.getHabits(includeArchived, page, limit),
+  });
+}
+
+export function useHabitCheckIns(habitId: ID, page: number = 1, limit: number = 20) {
+  return useQuery({
+    queryKey: ['check-ins', habitId, { page, limit }],
+    queryFn: () => api.getCheckIns(habitId, page, limit),
   });
 }
 
@@ -69,6 +76,7 @@ export function useCreateCheckIn() {
       api.createCheckIn(habitId, date),
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: ['habits'] });
+      qc.invalidateQueries({ queryKey: ['check-ins'] });
     },
   });
 }

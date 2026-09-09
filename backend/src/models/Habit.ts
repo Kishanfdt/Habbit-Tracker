@@ -57,17 +57,28 @@ export async function create(
 
 export async function findByUserId(
   userId: ID,
-  includeArchived: boolean = false
-): Promise<Habit[]> {
-  if (!mongoose.Types.ObjectId.isValid(userId)) return [];
+  includeArchived: boolean = false,
+  page?: number,
+  limit?: number
+): Promise<{ habits: Habit[]; total: number }> {
+  if (!mongoose.Types.ObjectId.isValid(userId)) return { habits: [], total: 0 };
   const query: Record<string, unknown> = { user_id: userId };
   if (!includeArchived) {
     query.archived = { $ne: true };
   }
-  const docs = await HabitModel.find(query)
-    .sort({ created_at: -1 })
-    .exec();
-  return docs.map((doc) => mapHabit(doc)!);
+
+  const total = await HabitModel.countDocuments(query).exec();
+  let queryBuilder = HabitModel.find(query).sort({ created_at: -1 });
+
+  if (page !== undefined && limit !== undefined) {
+    queryBuilder = queryBuilder.skip((page - 1) * limit).limit(limit);
+  }
+
+  const docs = await queryBuilder.exec();
+  return {
+    habits: docs.map((doc) => mapHabit(doc)!),
+    total,
+  };
 }
 
 export async function findById(id: ID): Promise<Habit | null> {

@@ -2,9 +2,7 @@ import * as HabitModel from '../models/Habit';
 import * as CheckInModel from '../models/CheckIn';
 import {
   getUserLocalToday,
-  utcToLocalDateStr,
   isFutureDate,
-  isBeforeDate,
 } from '../utils/dateUtils';
 import {
   NotFoundError,
@@ -47,10 +45,22 @@ export async function createCheckIn(
   }
 }
 
+export interface PaginatedCheckInsResult {
+  checkIns: CheckIn[];
+  pagination: {
+    page: number;
+    limit: number;
+    total: number;
+    totalPages: number;
+  };
+}
+
 export async function getCheckInsForHabit(
   habitId: ID,
-  userId: ID
-): Promise<CheckIn[]> {
+  userId: ID,
+  page?: number,
+  limit?: number
+): Promise<PaginatedCheckInsResult> {
   const habit = await HabitModel.findById(habitId);
   if (!habit) {
     throw new NotFoundError('Habit not found');
@@ -59,5 +69,19 @@ export async function getCheckInsForHabit(
     throw new ForbiddenError('You do not own this habit');
   }
 
-  return CheckInModel.findByHabitId(habitId);
+  const p = page ?? 1;
+  const l = limit ?? 20;
+
+  const { checkIns, total } = await CheckInModel.findByHabitId(habitId, p, l);
+  const totalPages = Math.ceil(total / l);
+
+  return {
+    checkIns,
+    pagination: {
+      page: p,
+      limit: l,
+      total,
+      totalPages,
+    },
+  };
 }

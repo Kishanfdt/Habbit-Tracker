@@ -14,12 +14,31 @@ export async function createHabit(
   return HabitModel.create(userId, name, description, category);
 }
 
+export interface PaginatedHabitsResponse {
+  habits: HabitWithStreaks[];
+  total: number;
+  page: number;
+  limit: number;
+  totalPages: number;
+}
+
 export async function getHabitsWithStreaks(
   userId: ID,
   userTimezone: string,
-  includeArchived: boolean = false
-): Promise<HabitWithStreaks[]> {
-  const habits = await HabitModel.findByUserId(userId, includeArchived);
+  includeArchived: boolean = false,
+  page?: number,
+  limit?: number
+): Promise<PaginatedHabitsResponse> {
+  const isPaginated = page !== undefined && limit !== undefined;
+  const p = page ?? 1;
+  const l = limit ?? 20;
+
+  const { habits, total } = await HabitModel.findByUserId(
+    userId,
+    includeArchived,
+    isPaginated ? p : undefined,
+    isPaginated ? l : undefined
+  );
   const today = getUserLocalToday(userTimezone);
 
   const results: HabitWithStreaks[] = [];
@@ -33,7 +52,16 @@ export async function getHabitsWithStreaks(
     });
   }
 
-  return results;
+  const effectiveLimit = isPaginated ? l : Math.max(1, total);
+  const totalPages = Math.ceil(total / effectiveLimit);
+
+  return {
+    habits: results,
+    total,
+    page: p,
+    limit: isPaginated ? l : total,
+    totalPages,
+  };
 }
 
 export const listHabits = getHabitsWithStreaks;
@@ -51,7 +79,7 @@ export async function getHabitDetail(
     throw new ForbiddenError('You do not own this habit');
   }
 
-  const checkIns = await CheckInModel.findByHabitId(habitId);
+  const { checkIns } = await CheckInModel.findByHabitId(habitId);
   const dates = checkIns.map((c) => c.local_date);
   const streaks = computeStreaks(dates, userTimezone);
 

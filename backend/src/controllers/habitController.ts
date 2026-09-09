@@ -1,5 +1,7 @@
 import { Request, Response, NextFunction } from 'express';
 import * as habitService from '../services/habitService';
+import { habitListQuerySchema } from '../validators/pagination';
+import { ValidationError } from '../middleware/errors';
 
 export async function create(req: Request, res: Response, next: NextFunction) {
   try {
@@ -15,9 +17,30 @@ export async function create(req: Request, res: Response, next: NextFunction) {
 export async function getAll(req: Request, res: Response, next: NextFunction) {
   try {
     if (!req.user) return res.status(401).json({ error: 'Unauthorized' });
-    const includeArchived = req.query.includeArchived === 'true';
-    const habits = await habitService.getHabitsWithStreaks(req.user.id, req.user.timezone, includeArchived);
-    res.json({ habits });
+    const parsed = habitListQuerySchema.safeParse(req.query);
+    if (!parsed.success) {
+      const message = parsed.error.errors
+        .map((e) => `${e.path.join('.')}: ${e.message}`)
+        .join(', ');
+      throw new ValidationError(message);
+    }
+    const { page, limit, includeArchived } = parsed.data;
+    const result = await habitService.getHabitsWithStreaks(
+      req.user.id,
+      req.user.timezone,
+      includeArchived,
+      page,
+      limit
+    );
+    res.json({
+      data: result.habits,
+      pagination: {
+        page: result.page,
+        limit: result.limit,
+        total: result.total,
+        totalPages: result.totalPages,
+      },
+    });
   } catch (error) {
     next(error);
   }

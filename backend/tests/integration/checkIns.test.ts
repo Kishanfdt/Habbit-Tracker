@@ -147,15 +147,35 @@ describe('Check-In Integration Tests', () => {
         .send({});
     });
 
-    test('Get check-ins for habit should return array', async () => {
+    test('Get check-ins for habit should return paginated data', async () => {
       const res = await request(app)
         .get(`/api/habits/${habitId}/check-ins`)
         .set('Authorization', `Bearer ${userToken}`);
 
       expect(res.status).toBe(200);
-      expect(res.body.checkIns).toBeInstanceOf(Array);
-      expect(res.body.checkIns.length).toBeGreaterThan(0);
-      expect(res.body.checkIns[0]).toHaveProperty('local_date');
+      expect(res.body.data).toBeInstanceOf(Array);
+      expect(res.body.data.length).toBeGreaterThan(0);
+      expect(res.body.data[0]).toHaveProperty('local_date');
+      expect(res.body.pagination).toBeDefined();
+      expect(res.body.pagination.page).toBe(1);
+      expect(res.body.pagination.limit).toBe(20);
+    });
+
+    test('Support pagination on check-ins and reject limit > 100', async () => {
+      const pageRes = await request(app)
+        .get(`/api/habits/${habitId}/check-ins?page=1&limit=1`)
+        .set('Authorization', `Bearer ${userToken}`);
+
+      expect(pageRes.status).toBe(200);
+      expect(pageRes.body.data.length).toBe(1);
+      expect(pageRes.body.pagination.limit).toBe(1);
+
+      const invalidRes = await request(app)
+        .get(`/api/habits/${habitId}/check-ins?limit=150`)
+        .set('Authorization', `Bearer ${userToken}`);
+
+      expect(invalidRes.status).toBe(400);
+      expect(invalidRes.body.error).toContain('limit');
     });
 
     test('Non-existent habit should return 404', async () => {

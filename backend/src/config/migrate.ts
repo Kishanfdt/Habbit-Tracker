@@ -1,12 +1,13 @@
 import { runMigrations, closePool } from './database';
+import { logger } from '../utils/logger';
 
 async function main() {
   try {
-    console.log('Starting database migrations...');
+    logger.info('Starting database migrations...');
     await runMigrations();
-    console.log('All migrations completed successfully.');
+    logger.info('All migrations completed successfully.');
   } catch (error) {
-    console.error('Migration failed:', error);
+    logger.error({ err: error }, 'Migration failed');
     process.exit(1);
   } finally {
     await closePool();

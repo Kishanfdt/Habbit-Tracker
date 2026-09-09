@@ -10,9 +10,10 @@ const CATEGORIES = ['all', 'health', 'productivity', 'learning', 'fitness', 'oth
 export default function DashboardPage() {
   const [showArchived, setShowArchived] = useState(false);
   const [categoryFilter, setCategoryFilter] = useState('all');
-  const { data: habits, isLoading, error } = useHabits(showArchived);
+  const { data: habitsResponse, isLoading, error } = useHabits(showArchived);
   const [showForm, setShowForm] = useState(false);
 
+  const habits = habitsResponse?.data;
   const filteredHabits = habits?.filter((habit) => {
     if (categoryFilter !== 'all' && (habit.category || 'other') !== categoryFilter) {
       return false;

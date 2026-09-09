@@ -51,12 +51,26 @@ export async function create(
   return mapCheckIn(doc)!;
 }
 
-export async function findByHabitId(habitId: ID): Promise<CheckIn[]> {
-  if (!mongoose.Types.ObjectId.isValid(habitId)) return [];
-  const docs = await CheckInModel.find({ habit_id: habitId })
-    .sort({ local_date: 1 })
-    .exec();
-  return docs.map((doc) => mapCheckIn(doc)!);
+export async function findByHabitId(
+  habitId: ID,
+  page?: number,
+  limit?: number
+): Promise<{ checkIns: CheckIn[]; total: number }> {
+  if (!mongoose.Types.ObjectId.isValid(habitId)) return { checkIns: [], total: 0 };
+  const query = { habit_id: habitId };
+  const total = await CheckInModel.countDocuments(query).exec();
+
+  let queryBuilder = CheckInModel.find(query).sort({ local_date: -1 });
+
+  if (page !== undefined && limit !== undefined) {
+    queryBuilder = queryBuilder.skip((page - 1) * limit).limit(limit);
+  }
+
+  const docs = await queryBuilder.exec();
+  return {
+    checkIns: docs.map((doc) => mapCheckIn(doc)!),
+    total,
+  };
 }
 
 export async function getLocalDatesForHabit(habitId: ID): Promise<string[]> {
